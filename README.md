@@ -91,6 +91,25 @@ node ch-cli.mjs stop <server-id>
 
 ---
 
+## 📦 Public jar catalog API
+
+Need a server jar without opening a browser? CraftHost exposes a free public catalog — **every engine, every version, direct downloads**. No key, no login.
+
+```bash
+BASE=https://crafthost-production.up.railway.app/api/jars/catalog
+
+curl $BASE                          # everything: all engines + all versions
+curl $BASE/paper?limit=10           # one engine (paper, vanilla, purpur, fabric, neoforge)
+curl $BASE/paper/1.21.1             # resolved: direct URL + build number
+curl -LO $BASE/paper/LATEST/download   # just download the jar
+```
+
+- `LATEST` works everywhere; `spigot` is an alias for paper
+- `/download` 302-redirects to the official upstream jar (PaperMC, Mojang, PurpurMC, FabricMC, NeoForge maven) — always the latest build for that version
+- NeoForge returns the **installer** jar: run `java -jar` once to extract the server
+
+---
+
 ## FAQ
 
 **Is it safe to share my .bat?** No — the token inside lets anyone start/stop (not delete) your server. Treat it like a key. Re-download from the dashboard if leaked (the token stays the same today — delete+recreate the server to rotate it).
