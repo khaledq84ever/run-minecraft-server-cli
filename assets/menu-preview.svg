@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" font-family="Consolas, Menlo, monospace">
+  <rect width="900" height="620" rx="14" fill="#0c0c0c"/>
+  <rect width="900" height="620" rx="14" fill="none" stroke="#f59e0b" stroke-opacity=".35" stroke-width="2"/>
+  <!-- title bar -->
+  <rect width="900" height="44" rx="14" fill="#1a1208"/>
+  <rect y="30" width="900" height="14" fill="#1a1208"/>
+  <circle cx="26" cy="22" r="7" fill="#ef4444"/><circle cx="50" cy="22" r="7" fill="#f59e0b"/><circle cx="74" cy="22" r="7" fill="#22c55e"/>
+  <text x="450" y="28" font-size="17" fill="#e7d3a8" text-anchor="middle">CraftHost — my-server Launcher</text>
+  <g font-size="20" fill="#d4d4d4">
+    <text x="48" y="96"  fill="#fbbf24">╔══════════════════════════════════════════════════╗</text>
+    <text x="48" y="126" fill="#fbbf24">║        CraftHost Launcher — my-server            ║</text>
+    <text x="48" y="156" fill="#fbbf24">╚══════════════════════════════════════════════════╝</text>
+    <text x="48" y="206">  Status : <tspan fill="#22c55e">online</tspan></text>
+    <text x="48" y="236">  Address: <tspan fill="#fbbf24">amber-creeper.joinmc.link</tspan></text>
+    <text x="48" y="266">  Type   : <tspan fill="#e7d3a8">paper 1.21.1</tspan></text>
+    <text x="48" y="296">  Players: <tspan fill="#e7d3a8">3/20</tspan></text>
+    <text x="48" y="346" fill="#a16207">────────  Actions  ────────</text>
+    <text x="48" y="392"><tspan fill="#fbbf24">[1]</tspan> Start server</text>
+    <text x="48" y="422"><tspan fill="#fbbf24">[2]</tspan> Stop server</text>
+    <text x="48" y="452"><tspan fill="#fbbf24">[3]</tspan> Restart server</text>
+    <text x="48" y="482"><tspan fill="#fbbf24">[4]</tspan> Refresh status</text>
+    <text x="48" y="512"><tspan fill="#fbbf24">[5]</tspan> Open dashboard</text>
+    <text x="48" y="542"><tspan fill="#fbbf24">[0]</tspan> Exit</text>
+    <text x="48" y="588">Select an option (0-5): <tspan fill="#fbbf24">_</tspan></text>
+  </g>
+</svg>
