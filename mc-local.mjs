@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-import { spawn, execSync } from "child_process";
+import { spawn, execFileSync } from "child_process";
 import { createInterface } from "readline";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, unlinkSync } from "fs";
 import { join, resolve } from "path";
-import { homedir } from "os";
 
 const CWD = process.cwd();
 const HELP = `
@@ -138,7 +137,7 @@ async function startServer(dir) {
   });
   writeFileSync(serverPidFile(dir), String(proc.pid));
   proc.on("exit", () => {
-    try { require("fs").unlinkSync(serverPidFile(dir)); } catch {}
+    try { unlinkSync(serverPidFile(dir)); } catch {}
   });
   // Auto-save every 5 min
   const saveTimer = setInterval(() => {
@@ -166,7 +165,7 @@ function stopServer(dir) {
     console.log("Sent SIGTERM to server process", pid);
   } catch (err) {
     console.log("Server not running.");
-    try { require("fs").unlinkSync(pidFile); } catch {}
+    try { unlinkSync(pidFile); } catch {}
   }
 }
 
@@ -174,7 +173,7 @@ function serverStatus(dir) {
   const running = isRunning(dir);
   const cfg = loadConfig(dir);
   const jarSize = existsSync(join(dir, "server.jar"))
-    ? (require("fs").statSync(join(dir, "server.jar")).size / 1024 / 1024).toFixed(1) + " MB"
+    ? (statSync(join(dir, "server.jar")).size / 1024 / 1024).toFixed(1) + " MB"
     : "N/A";
   console.log(`Directory: ${dir}`);
   console.log(`Running:   ${running ? "yes" : "no"}`);
@@ -212,7 +211,7 @@ async function attachConsole(dir) {
   proc.on("exit", () => {
     console.log("\nServer stopped.");
     rl.close();
-    try { require("fs").unlinkSync(serverPidFile(dir)); } catch {}
+    try { unlinkSync(serverPidFile(dir)); } catch {}
     process.exit(0);
   });
   rl.prompt();
@@ -292,10 +291,9 @@ async function backup(dir) {
   }
   const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const backupPath = join(dir, `backup-${ts}.zip`);
-  const { execSync } = await import("child_process");
   try {
-    execSync(`cd "${dir}" && zip -r "${backupPath}" world/`, { stdio: "inherit" });
-    const size = require("fs").statSync(backupPath).size;
+    execFileSync("zip", ["-r", backupPath, "world/"], { cwd: dir, stdio: "inherit" });
+    const size = statSync(backupPath).size;
     console.log(`Backup saved: ${backupPath} (${(size / 1024 / 1024).toFixed(1)} MB)`);
   } catch (err) {
     console.error("Backup failed:", err.message);

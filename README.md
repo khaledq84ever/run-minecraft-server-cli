@@ -21,7 +21,7 @@ Made by the [CraftHost](https://crafthost-production.up.railway.app) team — fr
 |---|---|---|
 | **`launcher-template.bat`** | Windows one-click launcher for your **CraftHost cloud server**: menu with Start / Stop / Restart / live status, copies the join address to your clipboard | Windows 10+ (nothing else) |
 | **`mc-local.mjs`** | Full CLI to run a Minecraft server **on your own machine**: downloads the jar, starts/stops it, console, backups | Node 18+ & Java |
-| **`ch-cli.mjs`** | Terminal client for the CraftHost API — manage your cloud servers without opening the browser | Node 18+ |
+| **`ch-cli.mjs`** | Terminal client for the CraftHost API — manage your cloud servers without opening the browser | Node 22+ (uses native `WebSocket`) |
 
 <p align="center">
   <img src="assets/features.svg" alt="features" width="100%">

@@ -4,7 +4,7 @@
   "description": "Run & control Minecraft servers: one-click Windows .bat launcher for CraftHost + local server CLI (paper/vanilla/fabric/purpur)",
   "type": "module",
   "bin": { "mc-local": "./mc-local.mjs", "ch-cli": "./ch-cli.mjs" },
-  "engines": { "node": ">=18" },
+  "engines": { "node": ">=22" },
   "license": "MIT",
   "author": "khaledq84ever",
   "repository": "github:khaledq84ever/run-minecraft-server-cli"
