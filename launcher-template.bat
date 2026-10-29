@@ -23,10 +23,13 @@ echo  ==================================================
 echo.
 curl -s -m 10 -o "%STATUS_FILE%" "%BASE%/api/launcher/%TOKEN%/status"
 if not exist "%STATUS_FILE%" (echo  Could not reach CraftHost. & pause & goto :menu)
-<"%STATUS_FILE%" set /p _S1=
-<"%STATUS_FILE%" set /p _S2= & set /p _S2=
-<"%STATUS_FILE%" set /p _S3= & set /p _S3= & set /p _S3=
-<"%STATUS_FILE%" set /p _S4= & set /p _S4= & set /p _S4= & set /p _S4=
+REM One redirected block so all four reads come from the file (a bare "& set /p" reads the keyboard).
+< "%STATUS_FILE%" (
+  set /p _S1=
+  set /p _S2=
+  set /p _S3=
+  set /p _S4=
+)
 del "%STATUS_FILE%" 2>nul
 if not defined _S1 set "_S1=offline"
 if not defined _S2 set "_S2=-"
@@ -61,7 +64,7 @@ echo  Invalid option. & timeout /t 2 /nobreak >nul & goto :menu
 :start
 if /i "%STATUS%"=="online" (echo  Server is already online! & timeout /t 2 /nobreak >nul & goto :menu)
 echo  Starting your server...
-for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/start"`) do set "REPLY=%%A"
+set "REPLY=" & for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/start"`) do set "REPLY=%%A"
 if not defined REPLY set "REPLY=ERROR no reply from CraftHost"
 echo  %REPLY%
 echo %REPLY%| findstr /b /c:"ERROR" >nul && (echo. & pause & goto :menu)
@@ -72,10 +75,12 @@ set /a TRIES+=1
 if %TRIES% GTR 60 (echo  Taking longer than usual - check your dashboard. & pause & goto :menu)
 timeout /t 5 /nobreak >nul
 curl -s -m 15 -o "%STATUS_FILE%" "%BASE%/api/launcher/%TOKEN%/status"
+set "ST="
 <"%STATUS_FILE%" set /p ST=
 if /i "%ST%"=="crashed" (del "%STATUS_FILE%" 2>nul & echo  Server crashed. Auto-heal will retry. & pause & goto :menu)
 if /i "%ST%"=="online" (
-  <"%STATUS_FILE%" set /p _A= & set /p _A=
+  set "_A="
+  < "%STATUS_FILE%" (set /p _A= & set /p _A=)
   del "%STATUS_FILE%" 2>nul
   echo.
   echo  ========================================
@@ -94,14 +99,14 @@ goto poll
 
 :stop
 echo  Stopping server...
-for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/stop"`) do set "REPLY=%%A"
+set "REPLY=" & for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/stop"`) do set "REPLY=%%A"
 echo  %REPLY%
 pause
 goto :menu
 
 :restart
 echo  Restarting server...
-for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/restart"`) do set "REPLY=%%A"
+set "REPLY=" & for /f "usebackq delims=" %%A in (`curl -s -m 30 -X POST "%BASE%/api/launcher/%TOKEN%/restart"`) do set "REPLY=%%A"
 echo  %REPLY%
 pause
 goto :menu

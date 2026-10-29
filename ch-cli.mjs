@@ -37,6 +37,7 @@ async function api(method, path, body) {
 }
 
 async function login(email, password) {
+  if (!email || !password) throw new Error("Usage: ch-cli login <email> <password>");
   const res = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -72,15 +73,24 @@ async function listServers() {
   }
 }
 
+/** Finds a server by full id or by the id prefix `list` prints. */
+async function findServer(id) {
+  if (!id) throw new Error("Missing server id (see: ch-cli list)");
+  const list = await api("GET", "/servers");
+  const matches = (list.servers || []).filter((x) => x.id.startsWith(id));
+  if (!matches.length) throw new Error("Server not found");
+  if (matches.length > 1) throw new Error(`Id prefix '${id}' matches ${matches.length} servers; use more characters`);
+  return matches[0];
+}
+
 async function serverCmd(id, action) {
-  const data = await api("POST", `/servers/${id}/${action}`);
+  const s = await findServer(id);
+  const data = await api("POST", `/servers/${s.id}/${action}`);
   console.log(data.status || data.message || "OK");
 }
 
 async function serverStatus(id) {
-  const list = await api("GET", "/servers");
-  const s = list.servers.find((x) => x.id.startsWith(id));
-  if (!s) throw new Error("Server not found");
+  const s = await findServer(id);
   console.log(`Name:     ${s.name}`);
   console.log(`ID:       ${s.id}`);
   console.log(`Type:     ${s.type} ${s.version || ""}`);
@@ -93,25 +103,24 @@ async function serverStatus(id) {
 }
 
 async function tailLogs(id) {
-  const list = await api("GET", "/servers");
-  const s = list.servers.find((x) => x.id.startsWith(id));
-  if (!s) throw new Error("Server not found");
+  const s = await findServer(id);
   const wsUrl = BASE.replace(/^http/, "ws") + `/ws/servers/${s.id}/logs`;
   const cfg = load();
   const ws = new WebSocket(
     wsUrl + "?token=" + encodeURIComponent(cfg.token || "")
   );
-  ws.on("message", (raw) => {
-    const msg = JSON.parse(raw.toString());
+  ws.addEventListener("message", (ev) => {
+    let msg;
+    try { msg = JSON.parse(String(ev.data)); } catch { return; }
     if (msg.type === "log") console.log(msg.line);
     else if (msg.type === "stats")
       console.log(
         `[stats] ${msg.stats.players} players · ${msg.stats.tps?.toFixed(1)} tps · ${Math.round(msg.stats.ram_used / 1024)}GB RAM`
       );
   });
-  ws.on("close", () => process.exit(0));
-  ws.on("error", (e) => {
-    console.error("WS error:", e.message);
+  ws.addEventListener("close", () => process.exit(0));
+  ws.addEventListener("error", (e) => {
+    console.error("WS error:", e.message || "connection failed");
     process.exit(1);
   });
 }
@@ -133,7 +142,8 @@ async function createServer(args) {
 }
 
 async function deleteServer(id) {
-  const data = await api("DELETE", `/servers/${id}`);
+  const s = await findServer(id);
+  const data = await api("DELETE", `/servers/${s.id}`);
   console.log("Deleted:", data.message || "OK");
 }
 
@@ -142,7 +152,7 @@ Usage: ch-cli <command> [options]
 
 Commands:
   login <email> <password>        Log in and save session
-  servers list                    List all servers
+  list  (or: servers list)        List all servers
   status <id>                     Show server details
   start <id>                      Start server
   stop <id>                       Stop server
@@ -186,9 +196,12 @@ try {
     case "login":
       await login(positional[1], positional[2]);
       break;
+    case "list":
+      await listServers();
+      break;
     case "servers":
       if (positional[1] === "list") await listServers();
-      else console.log("Usage: ch-cli servers list");
+      else console.log("Usage: ch-cli list");
       break;
     case "status":
       await serverStatus(positional[1]);

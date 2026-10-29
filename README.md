@@ -20,7 +20,7 @@ Made by the [CraftHost](https://crafthost-production.up.railway.app) team — fr
 | Tool | What it does | Needs |
 |---|---|---|
 | **`launcher-template.bat`** | Windows one-click launcher for your **CraftHost cloud server**: menu with Start / Stop / Restart / live status, copies the join address to your clipboard | Windows 10+ (nothing else) |
-| **`mc-local.mjs`** | Full CLI to run a Minecraft server **on your own machine**: downloads the jar, starts/stops it, console, backups | Node 18+ & Java |
+| **`mc-local.mjs`** | Full CLI to run a Minecraft server **on your own machine**: downloads the jar, starts/stops it, console, backups | Node 22+ & Java |
 | **`ch-cli.mjs`** | Terminal client for the CraftHost API — manage your cloud servers without opening the browser | Node 22+ (uses native `WebSocket`) |
 
 <p align="center">
@@ -69,13 +69,15 @@ Plain-text replies on purpose — `cmd.exe` + `curl` can parse them with zero de
 ```bash
 node mc-local.mjs install paper 1.21.1   # download the server jar
 node mc-local.mjs init                   # create config + accept EULA
-node mc-local.mjs start --ram 2048       # boot it (2 GB heap)
-node mc-local.mjs console               # attach interactive console
+node mc-local.mjs start --ram 2048       # boot it (2 GB heap); this terminal is the server console
 node mc-local.mjs backup                # zip the world
 node mc-local.mjs stop                  # graceful stop
 ```
 
 Supported engines: **paper · vanilla · fabric · purpur**. Config lives in `mc-local.json`, created on `init`.
+`--ram`, `--port` and `--java` are saved there, so you only pass them once. Use `--dir <path>` (or `MC_LOCAL_DIR`)
+to manage a server in another folder, and `install <type> <ver> --print-url` to see the download link without downloading.
+Paper and vanilla jars are checksum-verified after download.
 
 > Java 21 is required for Minecraft 1.21+, Java 17 for 1.18–1.20.
 
@@ -85,7 +87,7 @@ Supported engines: **paper · vanilla · fabric · purpur**. Config lives in `mc
 export CRAFTHOST_API=https://crafthost-production.up.railway.app
 node ch-cli.mjs login <user> <pass>
 node ch-cli.mjs list                    # your servers + status
-node ch-cli.mjs start <server-id>
+node ch-cli.mjs start <server-id>        # the 8-char id prefix from `list` works
 node ch-cli.mjs stop <server-id>
 ```
 
@@ -107,6 +109,18 @@ curl -LO $BASE/paper/LATEST/download   # just download the jar
 - `LATEST` works everywhere; `spigot` is an alias for paper
 - `/download` 302-redirects to the official upstream jar (PaperMC, Mojang, PurpurMC, FabricMC, NeoForge maven) — always the latest build for that version
 - NeoForge returns the **installer** jar: run `java -jar` once to extract the server
+
+---
+
+## Tests
+
+```bash
+npm test            # offline: mc-local, ch-cli (mock API), .bat launcher (Windows only)
+npm run test:live   # RUN_NETWORK_TESTS=1 / RUN_BOOT_TEST=1: real downloads + a real Paper boot (Java 21)
+```
+
+GitHub Actions runs the offline suite on Linux, Windows and macOS on every push and pull request. Every night it also
+runs the live suite, so a change on Paper's, Mojang's, Fabric's or Purpur's side shows up as a red build within a day.
 
 ---
 
